@@ -1,0 +1,8 @@
+{
+  "extensionName": {
+    "message": "Groupes 'On the Bar'"
+  },
+  "extensionDescription": {
+    "message": "Enregistre et synchronise les groupes d’onglets depuis la barre de marque-pages afin de les fermer et les restaurer en un clic."
+  }
+}

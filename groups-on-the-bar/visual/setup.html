@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Assistente visual — Grupos 'On the Bar'</title>
+    <link rel="stylesheet" href="setup.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand" data-i18n-aria-label="app.name" aria-label="Grupos 'On the Bar'">
+        <img src="../icons/icon.svg" alt="" width="42" height="42">
+        <span>
+          <strong data-i18n="app.name">Grupos 'On the Bar'</strong>
+          <small data-i18n="visualAssistant.subtitle">Assistente visual</small>
+        </span>
+      </div>
+      <button id="close-assistant" class="quiet-button" type="button" data-i18n="visualAssistant.close" data-i18n-aria-label="visualAssistant.close">Fechar</button>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow" data-i18n="visualAssistant.eyebrow">Visual opcional para Firefox Desktop</span>
+          <h1 data-i18n="visualAssistant.heroTitle">Transforme os atalhos em chips coloridos</h1>
+          <p data-i18n="visualAssistant.heroText">O instalador remove o globo, usa a cor real de cada grupo e mostra o ícone opcional escolhido. A abertura e o fechamento dos grupos continuam sob controle da extensão.</p>
+        </div>
+        <div class="preview" data-i18n-aria-label="visualAssistant.previewLabel" aria-label="Exemplo do resultado visual">
+          <div class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="preview-toolbar">
+            <span class="preview-chip purple">Pesquisa</span>
+            <span class="preview-chip red">YouTube</span>
+            <span class="preview-chip blue">Trabalho</span>
+          </div>
+          <span class="preview-caption" data-i18n="visualAssistant.previewCaption">Sem o globo padrão; o ícone do grupo é opcional</span>
+        </div>
+      </section>
+
+      <section class="platform-card" aria-labelledby="platform-title">
+        <span id="platform-icon" class="platform-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/><path d="m8 12 2.5 2.5L16 9"/></svg>
+        </span>
+        <div>
+          <strong id="platform-title" data-i18n="visualAssistant.checking">Verificando seu sistema…</strong>
+          <p id="platform-description" role="status" aria-live="polite" data-i18n="visualAssistant.checkingText">O pacote será liberado quando a verificação terminar.</p>
+        </div>
+      </section>
+
+      <section class="steps-card" aria-labelledby="steps-title">
+        <div class="section-heading">
+          <span data-i18n="visualAssistant.guided">Instalação guiada</span>
+          <h2 id="steps-title" data-i18n="visualAssistant.fourSteps">Quatro passos</h2>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <span class="step-number">1</span>
+            <div class="step-content">
+              <h3 data-i18n="visualAssistant.step1Title">Baixe o pacote visual</h3>
+              <p data-i18n="visualAssistant.step1Text">Ele já está incluído nesta extensão e não acessa nenhum servidor.</p>
+              <a id="download-visual" class="primary-link is-disabled" href="#" aria-disabled="true" data-i18n-aria-label="visualAssistant.waiting">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 20h14"/></svg>
+                <span id="download-label" data-i18n="visualAssistant.waiting">Aguardando detecção do sistema</span>
+              </a>
+              <p id="download-status" class="inline-status" role="status" aria-live="polite" hidden data-i18n="visualAssistant.downloadStarted">Download iniciado. Abra o ZIP na pasta Downloads.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">2</span>
+            <div class="step-content">
+              <h3 data-i18n="visualAssistant.step2Title">Extraia o ZIP</h3>
+              <p data-i18n="visualAssistant.step2Text">Mantenha os arquivos extraídos juntos. O instalador usa a folha de estilo incluída na mesma pasta.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">3</span>
+            <div class="step-content">
+              <h3 id="quit-title" data-i18n="visualAssistant.step3Title">Encerre completamente o Firefox</h3>
+              <p id="quit-description" data-i18n="visualAssistant.step3Text">O assistente mostrará a instrução correta para seu sistema.</p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">4</span>
+            <div class="step-content">
+              <h3 id="installer-title" data-i18n="visualAssistant.step4Title">Execute o instalador e reinicie</h3>
+              <p id="installer-description" data-i18n="visualAssistant.step4Text">A instrução será adaptada ao seu sistema operacional.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+
+
+      <details class="details-card">
+        <summary data-i18n="visualAssistant.removeSummary" data-i18n-aria-label="visualAssistant.removeSummary">Como remover o visual</summary>
+        <p id="remove-description" data-i18n="visualAssistant.removeDefault">O pacote inclui um removedor que preserva outras personalizações do Firefox.</p>
+      </details>
+
+      <details class="details-card">
+        <summary data-i18n="visualAssistant.troubleshootSummary" data-i18n-aria-label="visualAssistant.troubleshootSummary">Se o chip não aparecer</summary>
+        <ul>
+          <li id="restart-help" data-i18n="visualAssistant.restartDefault">Confirme que o Firefox foi encerrado completamente antes da instalação.</li>
+          <li data-i18n="visualAssistant.reloadHelp">Depois de instalar o visual, encerre completamente e abra novamente o Firefox.</li>
+          <li id="installer-help" data-i18n="visualAssistant.installerDefault">Confira as instruções do README incluído no pacote.</li>
+        </ul>
+      </details>
+
+      <details class="details-card">
+        <summary data-i18n="visualAssistant.otherSystemSummary" data-i18n-aria-label="visualAssistant.otherSystemSummary">Baixar para outro sistema</summary>
+        <p data-i18n="visualAssistant.otherSystemText">Os três pacotes ficam incorporados nesta extensão. Escolha manualmente se estiver preparando a instalação para outro computador.</p>
+        <div class="alternate-downloads">
+          <a href="groups-on-the-bar-visual-macos-v3.0.10.zipdata" download="groups-on-the-bar-visual-macos-v3.0.10.zip">macOS</a>
+          <a href="groups-on-the-bar-visual-windows-v3.0.10.zipdata" download="groups-on-the-bar-visual-windows-v3.0.10.zip">Windows</a>
+          <a href="groups-on-the-bar-visual-linux-v3.0.10.zipdata" download="groups-on-the-bar-visual-linux-v3.0.10.zip">Linux</a>
+        </div>
+      </details>
+
+      <p class="privacy-note" data-i18n="visualAssistant.privacy">O assistente funciona localmente. Ele não envia seus grupos, favoritos ou histórico para nenhum servidor.</p>
+    </main>
+
+    <script src="../translations-extra.js"></script>
+    <script src="../ui-preferences.js"></script>
+    <script src="setup.js"></script>
+  </body>
+</html>

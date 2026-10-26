@@ -1,0 +1,55 @@
+{
+  "manifest_version": 2,
+  "default_locale": "en",
+  "name": "__MSG_extensionName__",
+  "version": "3.0.0",
+  "description": "__MSG_extensionDescription__",
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "grupos-na-barra-firefox@tiago7.local",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": [
+          "browsingActivity",
+          "bookmarksInfo"
+        ]
+      }
+    }
+  },
+  "permissions": [
+    "bookmarks",
+    "tabs",
+    "cookies",
+    "tabGroups",
+    "storage",
+    "menus",
+    "webRequest",
+    "webRequestBlocking",
+    "https://grupos-na-barra.invalid/*"
+  ],
+  "content_security_policy": "script-src 'self'; object-src 'none'",
+  "background": {
+    "scripts": [
+      "translations-extra.js",
+      "ui-preferences.js",
+      "sync-store.js",
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_title": "__MSG_extensionName__",
+    "default_popup": "popup/popup.html",
+    "default_icon": "icons/icon.svg",
+    "default_area": "navbar"
+  },
+  "options_ui": {
+    "page": "visual/setup.html",
+    "open_in_tab": true
+  },
+  "incognito": "not_allowed"
+}
