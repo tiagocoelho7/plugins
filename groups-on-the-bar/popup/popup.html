@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Grupos 'On the Bar'</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <img src="../icons/icon.svg" alt="" width="39" height="39">
+        <div>
+          <h1 data-i18n="app.name">Grupos 'On the Bar'</h1>
+          <p data-i18n="app.subtitle">Seus grupos sempre por perto</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="app-version" class="app-version" aria-label="Extension version"></span>
+        <button id="settings" class="icon-button" type="button" data-i18n-title="button.settings" data-i18n-aria-label="button.settings" title="Configurações" aria-label="Configurações">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>
+        </button>
+        <button id="accessibility" class="icon-button" type="button" data-i18n-title="button.accessibility" data-i18n-aria-label="button.accessibility" title="Acessibilidade" aria-label="Acessibilidade">
+          <span class="accessibility-glyph" aria-hidden="true">Aa</span>
+        </button>
+        <button id="language" class="icon-button" type="button" data-i18n-title="button.language" data-i18n-aria-label="button.language" title="Idioma" aria-label="Idioma">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h9M7.5 3v2c0 4.1-1.8 7.2-4.5 9m2.2-5c1.3 2.2 3 4 5.2 5.3M13.5 20l3.2-9h1.1l3.2 9m-6-4h4.5"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <section class="section saved-section" aria-labelledby="saved-heading">
+        <h2 id="saved-heading" class="visually-hidden" data-i18n="saved.heading">Grupos salvos</h2>
+        <div id="saved-action-bar" class="saved-action-bar">
+          <div id="all-scope" class="all-scope">
+            <label class="compact-switch-label" for="include-archived-all">
+              <span data-i18n="filter.includeArchivedShort">Show Archived</span>
+              <span class="switch compact-switch">
+                <input id="include-archived-all" type="checkbox" role="switch" data-i18n-aria-label="filter.includeArchived">
+                <span class="slider" aria-hidden="true"></span>
+              </span>
+            </label>
+            <span id="archive-info-wrap" class="info-wrap archive-info-wrap">
+              <button id="archive-info" class="info-button compact-info-button" type="button" aria-expanded="false" aria-describedby="archive-info-tooltip" data-i18n-aria-label="filter.includeArchivedInfoLabel" aria-label="Sobre os arquivados em Todos">i</button>
+              <span id="archive-info-tooltip" class="info-tooltip archive-info-tooltip" role="tooltip" data-i18n="filter.includeArchivedInfo">Desligado por padrão para listas grandes. Arquivados continuam disponíveis no filtro próprio.</span>
+            </span>
+          </div>
+          <div id="closed-scope" class="bulk-actions" hidden>
+            <button id="archive-all-closed" class="compact-action-button" type="button" data-i18n="action.archiveAllClosed">Arquivar tudo</button>
+          </div>
+          <div id="archived-scope" class="bulk-actions" hidden>
+            <button id="unarchive-all" class="compact-action-button" type="button" data-i18n="action.unarchiveAll">Desarquivar tudo</button>
+            <button id="trash-all-archived" class="compact-action-button danger-action" type="button" data-i18n="action.trashAllArchived">Apagar todos</button>
+          </div>
+          <div id="trash-scope" class="bulk-actions" hidden>
+            <button id="empty-trash" class="compact-action-button danger-action" type="button" data-i18n="action.emptyTrash">Esvaziar lixeira</button>
+          </div>
+        </div>
+
+        <div id="group-filters" class="filter-bar" role="group" data-i18n-aria-label="filter.label" aria-label="Filtrar grupos">
+          <button class="filter-button is-active" type="button" data-filter="all" aria-pressed="true" data-i18n-aria-label="filter.all">
+            <span data-i18n="filter.all">Todos</span><span id="filter-count-all" class="filter-count">0</span>
+          </button>
+          <button class="filter-button" type="button" data-filter="open" aria-pressed="false" data-i18n-aria-label="filter.open">
+            <span data-i18n="filter.open">Abertos</span><span id="filter-count-open" class="filter-count">0</span>
+          </button>
+          <button class="filter-button" type="button" data-filter="closed" aria-pressed="false" data-i18n-aria-label="filter.closed">
+            <span data-i18n="filter.closed">Fechados</span><span id="filter-count-closed" class="filter-count">0</span>
+          </button>
+          <button class="filter-button" type="button" data-filter="archived" aria-pressed="false" data-i18n-aria-label="filter.archived">
+            <span data-i18n="filter.archived">Arquivados</span><span id="filter-count-archived" class="filter-count">0</span>
+          </button>
+          <button class="filter-button filter-trash-button" type="button" data-filter="trash" aria-pressed="false" data-i18n-aria-label="filter.trash">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>
+            <span id="filter-count-trash" class="filter-count">0</span>
+          </button>
+        </div>
+
+        <div id="saved-groups" class="group-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div id="sync-shell" class="sync-shell">
+        <div id="sync-status" class="sync-status" aria-labelledby="sync-status-title">
+          <span class="sync-dot" aria-hidden="true"></span>
+          <strong id="sync-status-title" data-i18n="sync.preparingTitle">Preparando os dados locais…</strong>
+          <div id="sync-storage" class="sync-storage" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-i18n-aria-label="sync.storageLabel">
+            <svg class="storage-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v13H4Z"/><path d="M7 15h10M8 9h8M17 17h.01"/></svg>
+            <span class="storage-track" aria-hidden="true"><span id="sync-storage-fill" class="storage-fill"></span></span>
+            <span id="sync-storage-percent" class="storage-percent">0%</span>
+          </div>
+          <span id="sync-info-wrap" class="info-wrap sync-info-wrap">
+            <button id="sync-info" class="info-button compact-info-button" type="button" aria-expanded="false" aria-describedby="sync-status-detail" data-i18n-aria-label="sync.infoLabel" aria-label="Sobre o estado do Firefox Sync">i</button>
+            <span id="sync-status-detail" class="info-tooltip sync-tooltip" role="tooltip" data-i18n="sync.preparingText">O Firefox controla o envio à conta Mozilla e aos outros computadores.</span>
+          </span>
+        </div>
+        <button id="toggle-sync" class="sync-collapse-button" type="button" aria-expanded="true" data-i18n-aria-label="sync.collapse" aria-label="Recolher status do Firefox Sync">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+          <span class="sync-collapse-alert" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div id="visual-promo" class="visual-promo">
+        <a id="visual-setup" class="visual-setup-button" href="../visual/setup.html" target="_blank" rel="noopener" data-i18n-aria-label="visual.title">
+          <span class="visual-setup-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.4a1.6 1.6 0 0 0 1.2-2.7 1.6 1.6 0 0 1 1.2-2.7H18a3 3 0 0 0 3-3A9.6 9.6 0 0 0 12 3Z"/><circle cx="7.7" cy="11" r=".8"/><circle cx="10" cy="7.3" r=".8"/><circle cx="14.4" cy="7.2" r=".8"/><circle cx="17" cy="10.6" r=".8"/></svg>
+          </span>
+          <span class="visual-setup-copy">
+            <strong data-i18n="visual.title">Visual de chip</strong>
+            <small data-i18n="visual.text">Instalar, conferir ou remover no Desktop</small>
+          </span>
+          <svg class="visual-setup-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+        </a>
+        <button id="dismiss-visual-promo" class="promo-dismiss icon-button" type="button" data-i18n-title="visual.dismiss" data-i18n-aria-label="visual.dismiss" title="Ocultar sugestão" aria-label="Ocultar sugestão">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+        </button>
+      </div>
+    </footer>
+
+    <template id="saved-group-template">
+      <article class="group-card saved-card">
+        <button class="group-open" type="button">
+          <span class="group-marker" aria-hidden="true"></span>
+          <span class="group-main">
+            <strong class="group-title"></strong>
+            <span class="group-meta"></span>
+          </span>
+          <span class="status-pill"></span>
+        </button>
+        <div class="group-preview" hidden>
+          <ol class="group-preview-list"></ol>
+          <span class="group-preview-more"></span>
+        </div>
+        <div class="group-actions">
+          <button class="text-button open-button" type="button"></button>
+          <button class="icon-button edit-button" type="button" data-i18n-aria-label="action.edit" aria-label="Edit group"></button>
+          <button class="icon-button preview-button" type="button" aria-expanded="false" data-i18n-aria-label="action.previewTabs" aria-label="Preview tabs"></button>
+          <button class="icon-button keep-top-button" type="button" data-i18n-aria-label="action.keepAtTop" aria-label="Keep group at the top"></button>
+          <button class="icon-button order-handle" type="button" draggable="true" data-i18n-aria-label="action.moveGroup" aria-label="Move group"></button>
+          <button class="icon-button bookmark-button" type="button" data-i18n-aria-label="action.pin" aria-label="Pin shortcut"></button>
+          <button class="icon-button archive-button" type="button" data-i18n-aria-label="action.archive" aria-label="Archive group"></button>
+          <button class="icon-button delete-button" type="button" data-i18n-aria-label="action.delete" aria-label="Delete group">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>
+          </button>
+        </div>
+      </article>
+    </template>
+
+    <template id="trash-group-template">
+      <article class="group-card trash-card">
+        <div class="trash-group-head">
+          <span class="group-marker" aria-hidden="true"></span>
+          <span class="group-main">
+            <strong class="group-title"></strong>
+            <span class="group-meta"></span>
+          </span>
+          <span class="trash-expiry"></span>
+        </div>
+        <div class="group-preview trash-preview">
+          <ol class="group-preview-list"></ol>
+          <span class="group-preview-more"></span>
+        </div>
+        <div class="group-actions trash-actions">
+          <button class="text-button restore-button" type="button" data-i18n="action.restore">Restaurar</button>
+          <button class="icon-button permanent-delete-button" type="button" data-i18n-aria-label="action.deletePermanently" aria-label="Delete permanently">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>
+          </button>
+        </div>
+      </article>
+    </template>
+
+    <dialog id="edit-dialog" aria-labelledby="edit-dialog-title">
+      <form id="edit-form" method="dialog">
+        <div class="dialog-heading">
+          <h2 id="edit-dialog-title" data-i18n="edit.title">Editar grupo</h2>
+          <button id="cancel-edit-x" class="icon-button" type="button" data-i18n-aria-label="button.close" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <label class="field edit-title-field">
+          <input id="edit-title" type="text" maxlength="80" autocomplete="off" data-i18n-aria-label="edit.name">
+        </label>
+        <fieldset>
+          <legend data-i18n="edit.color">Cor do grupo e do ícone</legend>
+          <div id="color-options" class="color-options"></div>
+        </fieldset>
+        <fieldset>
+          <legend data-i18n="edit.icon">Ícone</legend>
+          <div id="icon-options" class="icon-options" role="group" data-i18n-aria-label="edit.icon"></div>
+        </fieldset>
+        <div class="edit-footer">
+          <div class="edit-darker-control">
+            <label class="edit-darker-label" for="edit-darker-colors">
+              <span data-i18n="edit.darkerColors">Darker colors</span>
+              <span class="switch compact-switch">
+                <input id="edit-darker-colors" type="checkbox" role="switch" data-i18n-aria-label="edit.darkerColors">
+                <span class="slider" aria-hidden="true"></span>
+              </span>
+            </label>
+            <span id="edit-darker-info-wrap" class="info-wrap edit-darker-info-wrap">
+              <button id="edit-darker-info" class="info-button compact-info-button" type="button" aria-expanded="false" aria-describedby="edit-darker-info-tooltip" data-i18n-aria-label="edit.darkerColorsInfoLabel" aria-label="About darker colors">i</button>
+              <span id="edit-darker-info-tooltip" class="info-tooltip edit-darker-info-tooltip" role="tooltip" data-i18n="edit.darkerColorsInfo">Uses the darker Firefox group palette for this group in light mode.</span>
+            </span>
+          </div>
+          <div class="dialog-actions">
+            <button id="cancel-edit" class="secondary-button" type="button" data-i18n="edit.cancel" data-i18n-aria-label="edit.cancel">Cancelar</button>
+            <button class="primary-button" type="submit" data-i18n="edit.save" data-i18n-aria-label="edit.save">Salvar</button>
+          </div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="language-dialog" class="settings-dialog" aria-labelledby="language-dialog-title" aria-describedby="language-dialog-description">
+      <div class="settings-dialog-content">
+        <div class="dialog-heading">
+          <div>
+            <h2 id="language-dialog-title" data-i18n="language.title">Escolher idioma</h2>
+            <p id="language-dialog-description" data-i18n="language.text">A escolha ficará salva neste Firefox.</p>
+          </div>
+          <button id="close-language" class="icon-button" type="button" data-i18n-aria-label="button.close" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <div class="choice-list">
+          <button class="choice-row" type="button" data-language="en" data-i18n-aria-label="language.en"><span data-i18n="language.en">English</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="es" data-i18n-aria-label="language.es"><span data-i18n="language.es">Español</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="pt-BR" data-i18n-aria-label="language.pt-BR"><span data-i18n="language.pt-BR">Português (Brasil)</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="zh-CN" data-i18n-aria-label="language.zh-CN"><span data-i18n="language.zh-CN">简体中文</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="ja" data-i18n-aria-label="language.ja"><span data-i18n="language.ja">日本語</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="ko" data-i18n-aria-label="language.ko"><span data-i18n="language.ko">한국어</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="de" data-i18n-aria-label="language.de"><span data-i18n="language.de">Deutsch</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="fr" data-i18n-aria-label="language.fr"><span data-i18n="language.fr">Français</span><span class="choice-check" aria-hidden="true">✓</span></button>
+          <button class="choice-row" type="button" data-language="ru" data-i18n-aria-label="language.ru"><span data-i18n="language.ru">Русский</span><span class="choice-check" aria-hidden="true">✓</span></button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-dialog-title" aria-describedby="settings-dialog-description">
+      <div class="settings-dialog-content">
+        <div class="dialog-heading">
+          <div>
+            <h2 id="settings-dialog-title" data-i18n="settings.title">Configurações</h2>
+            <p id="settings-dialog-description" data-i18n="settings.text">Preferências permanentes deste Firefox.</p>
+          </div>
+          <button id="close-settings" class="icon-button" type="button" data-i18n-aria-label="button.close" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <label class="settings-toggle settings-toggle-first" for="auto-pin">
+          <span>
+            <strong data-i18n="autoPin.title">Fixar novos grupos automaticamente</strong>
+            <small data-i18n="autoPin.text">Todo grupo criado passa a aparecer na barra.</small>
+          </span>
+          <span class="switch">
+            <input id="auto-pin" type="checkbox" data-i18n-aria-label="autoPin.title">
+            <span class="slider" aria-hidden="true"></span>
+          </span>
+        </label>
+        <section class="backup-settings" aria-labelledby="backup-settings-title">
+          <div class="backup-settings-heading">
+            <span class="backup-drive-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 5.5h16v13H4Z"/><path d="M7 15h10M8 9h8M17 17h.01"/></svg>
+            </span>
+            <span>
+              <strong id="backup-settings-title" data-i18n="backup.title">Backup dos grupos</strong>
+              <small id="backup-summary" data-i18n="backup.preparing">Verificando o backup automático…</small>
+            </span>
+          </div>
+          <div class="backup-actions">
+            <button id="export-json" class="secondary-button" type="button" data-i18n="backup.export" data-i18n-aria-label="backup.export">Exportar JSON</button>
+            <button id="restore-sync-backup" class="secondary-button" type="button" data-i18n="backup.restore" data-i18n-aria-label="backup.restore">Restaurar cópia anterior</button>
+          </div>
+        </section>
+        <section class="panel-settings" aria-labelledby="panel-settings-title">
+          <div class="panel-settings-heading">
+            <strong id="panel-settings-title" data-i18n="panel.title">Panel view</strong>
+            <span id="panel-view-info-wrap" class="info-wrap panel-view-info-wrap">
+              <button id="panel-view-info" class="info-button compact-info-button" type="button" aria-expanded="false" aria-describedby="panel-view-info-tooltip" data-i18n-aria-label="panel.infoLabel" aria-label="About Panel view">i</button>
+              <span id="panel-view-info-tooltip" class="info-tooltip panel-view-info-tooltip" role="tooltip" data-i18n="panel.info">Defines how many groups appear in All before the + button. Unlimited shows every group.</span>
+            </span>
+          </div>
+          <div class="panel-view-slider-wrap">
+            <input id="panel-view-slider" class="panel-view-slider" type="range" min="0" max="3" step="1" value="0" data-i18n-aria-label="panel.sliderLabel">
+            <div class="panel-view-slider-labels" aria-hidden="true">
+              <span>3</span><span>5</span><span>10</span><span class="slider-infinity">∞</span>
+            </div>
+          </div>
+          <div class="preview-count-setting">
+            <div class="preview-count-heading">
+              <strong data-i18n="panel.previewTitle">Tab preview</strong>
+              <span id="preview-count-info-wrap" class="info-wrap panel-view-info-wrap preview-count-info-wrap">
+                <button id="preview-count-info" class="info-button compact-info-button" type="button" aria-expanded="false" aria-describedby="preview-count-info-tooltip" data-i18n-aria-label="panel.previewInfoLabel" aria-label="About tab preview">i</button>
+                <span id="preview-count-info-tooltip" class="info-tooltip panel-view-info-tooltip preview-count-info-tooltip" role="tooltip" data-i18n="panel.previewInfo">Choose how many tab previews appear inside each group card.</span>
+              </span>
+            </div>
+            <div class="panel-view-slider-wrap preview-count-slider-wrap">
+              <input id="preview-count-slider" class="panel-view-slider" type="range" min="0" max="3" step="1" value="0" data-i18n-aria-label="panel.previewSliderLabel">
+              <div class="panel-view-slider-labels" aria-hidden="true">
+                <span>3</span><span>5</span><span>7</span><span>9</span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="diagnostics-settings" aria-labelledby="diagnostics-settings-title">
+          <div class="diagnostics-settings-copy">
+            <strong id="diagnostics-settings-title" data-i18n="diagnostics.title">Diagnóstico</strong>
+            <small id="diagnostics-summary" data-i18n="diagnostics.none">Nenhum erro local registrado.</small>
+          </div>
+          <button id="open-diagnostics" class="secondary-button" type="button" data-i18n="diagnostics.open">Ver diagnóstico</button>
+        </section>
+        <a class="settings-visual-link" href="../visual/setup.html" target="_blank" rel="noopener" data-i18n-aria-label="visual.title">
+          <span class="visual-setup-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.4a1.6 1.6 0 0 0 1.2-2.7 1.6 1.6 0 0 1 1.2-2.7H18a3 3 0 0 0 3-3A9.6 9.6 0 0 0 12 3Z"/><circle cx="7.7" cy="11" r=".8"/><circle cx="10" cy="7.3" r=".8"/><circle cx="14.4" cy="7.2" r=".8"/><circle cx="17" cy="10.6" r=".8"/></svg>
+          </span>
+          <span class="visual-setup-copy">
+            <strong data-i18n="visual.title">Visual de chip</strong>
+            <small data-i18n="visual.text">Instalar, conferir ou remover no Desktop</small>
+          </span>
+          <svg class="visual-setup-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </dialog>
+
+    <dialog id="diagnostics-dialog" class="settings-dialog diagnostics-dialog" aria-labelledby="diagnostics-dialog-title" aria-describedby="diagnostics-dialog-description">
+      <div class="settings-dialog-content">
+        <div class="dialog-heading">
+          <div>
+            <h2 id="diagnostics-dialog-title" data-i18n="diagnostics.title">Diagnóstico</h2>
+            <p id="diagnostics-dialog-description" data-i18n="diagnostics.text">Histórico local de erros para diagnóstico.</p>
+          </div>
+          <button id="close-diagnostics" class="icon-button" type="button" data-i18n-aria-label="button.close" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <p class="diagnostics-privacy" data-i18n="diagnostics.privacy">O relatório não inclui URLs, títulos de abas, nomes de grupos, favoritos nem histórico. Nada é enviado automaticamente.</p>
+        <div id="diagnostic-list" class="diagnostic-list"></div>
+        <div class="diagnostic-actions">
+          <button id="copy-diagnostics" class="secondary-button" type="button" data-i18n="diagnostics.copy">Copiar JSON</button>
+          <button id="download-diagnostics" class="secondary-button" type="button" data-i18n="diagnostics.download">Baixar JSON</button>
+          <button id="clear-diagnostics" class="secondary-button danger-action" type="button" data-i18n="diagnostics.clear">Limpar registro</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="accessibility-dialog" class="settings-dialog" aria-labelledby="accessibility-dialog-title" aria-describedby="accessibility-dialog-description">
+      <div class="settings-dialog-content">
+        <div class="dialog-heading">
+          <div>
+            <h2 id="accessibility-dialog-title" data-i18n="access.title">Acessibilidade</h2>
+            <p id="accessibility-dialog-description" data-i18n="access.text">Ajuste a leitura e o movimento da interface.</p>
+          </div>
+          <button id="close-accessibility" class="icon-button" type="button" data-i18n-aria-label="button.close" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+
+        <fieldset class="settings-fieldset">
+          <legend data-i18n="access.fontTitle">Tamanho do texto</legend>
+          <div class="font-size-grid">
+            <button type="button" data-font-size="small" data-i18n="access.font.small" data-i18n-aria-label="access.font.small">Pequeno</button>
+            <button type="button" data-font-size="default" data-i18n="access.font.default" data-i18n-aria-label="access.font.default">Padrão</button>
+            <button type="button" data-font-size="large" data-i18n="access.font.large" data-i18n-aria-label="access.font.large">Grande</button>
+            <button type="button" data-font-size="extra-large" data-i18n="access.font.extra-large" data-i18n-aria-label="access.font.extra-large">Muito grande</button>
+          </div>
+        </fieldset>
+
+        <label class="settings-toggle" for="high-contrast">
+          <span><strong data-i18n="access.contrastTitle">Alto contraste</strong><small data-i18n="access.contrastText">Reforça contornos, textos e botões.</small></span>
+          <span class="switch"><input id="high-contrast" type="checkbox" data-i18n-aria-label="access.contrastTitle"><span class="slider" aria-hidden="true"></span></span>
+        </label>
+        <label class="settings-toggle" for="reduce-motion">
+          <span><strong data-i18n="access.motionTitle">Reduzir animações</strong><small data-i18n="access.motionText">Remove transições e movimentos decorativos.</small></span>
+          <span class="switch"><input id="reduce-motion" type="checkbox" data-i18n-aria-label="access.motionTitle"><span class="slider" aria-hidden="true"></span></span>
+        </label>
+        <button id="reset-accessibility" class="secondary-button reset-button" type="button" data-i18n="access.reset" data-i18n-aria-label="access.reset">Restaurar padrão</button>
+      </div>
+    </dialog>
+
+    <script src="../translations-extra.js"></script>
+    <script src="../ui-preferences.js"></script>
+    <script src="view-model.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

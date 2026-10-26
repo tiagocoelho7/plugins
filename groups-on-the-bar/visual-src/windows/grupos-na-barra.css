@@ -1,0 +1,714 @@
+/*
+ * Groups 'On the Bar' — complemento visual para Firefox Desktop.
+ * Os seletores reconhecem os sufixos Unicode invisíveis criados pela extensão.
+ */
+
+@-moz-document url("chrome://browser/content/browser.xhtml") {
+  #PlacesToolbarItems > toolbarbutton.bookmark-item:is(
+      [label$="\2060\E0100"],
+      [label$="\2060\E0101"],
+      [label$="\2060\E0102"],
+      [label$="\2060\E0103"],
+      [label$="\2060\E0104"],
+      [label$="\2060\E0105"],
+      [label$="\2060\E0106"],
+      [label$="\2060\E0107"],
+      [label$="\2060\E0108"]
+    ) {
+    appearance: none !important;
+    background-color: var(--gnb-chip-background) !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    color: var(--gnb-chip-foreground, #ffffff) !important;
+    font-weight: 600 !important;
+    height: 28px !important;
+    margin-block: 3px !important;
+    margin-inline: 2px !important;
+    min-height: 28px !important;
+    min-width: 44px !important;
+    padding-inline: 10px !important;
+    text-shadow: none !important;
+  }
+
+  /* O favicon do endereço .invalid é sempre um globo. Ele fica oculto e o
+     desenho escolhido é inserido como um elemento próprio, sem depender do src. */
+  #PlacesToolbarItems > toolbarbutton.bookmark-item:is(
+      [label$="\2060\E0100"], [label$="\2060\E0101"], [label$="\2060\E0102"],
+      [label$="\2060\E0103"], [label$="\2060\E0104"], [label$="\2060\E0105"],
+      [label$="\2060\E0106"], [label$="\2060\E0107"], [label$="\2060\E0108"]
+    ) .toolbarbutton-icon {
+    display: none !important;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item:is(
+      [label*="\2060\E0201"], [label*="\2060\E0202"], [label*="\2060\E0203"],
+      [label*="\2060\E0204"], [label*="\2060\E0205"], [label*="\2060\E0206"],
+      [label*="\2060\E0207"], [label*="\2060\E0208"], [label*="\2060\E0209"],
+      [label*="\2060\E020A"], [label*="\2060\E020B"], [label*="\2060\E020C"],
+      [label*="\2060\E020D"], [label*="\2060\E020E"], [label*="\2060\E020F"]
+    )::before,
+  tab-group:is(
+      [label*="\2060\E0201"], [label*="\2060\E0202"], [label*="\2060\E0203"],
+      [label*="\2060\E0204"], [label*="\2060\E0205"], [label*="\2060\E0206"],
+      [label*="\2060\E0207"], [label*="\2060\E0208"], [label*="\2060\E0209"],
+      [label*="\2060\E020A"], [label*="\2060\E020B"], [label*="\2060\E020C"],
+      [label*="\2060\E020D"], [label*="\2060\E020E"], [label*="\2060\E020F"]
+    ) .tab-group-label::before,
+  .tab-group-label:is(
+      [label*="\2060\E0201"], [value*="\2060\E0201"], [aria-label*="\2060\E0201"],
+      [label*="\2060\E0202"], [value*="\2060\E0202"], [aria-label*="\2060\E0202"],
+      [label*="\2060\E0203"], [value*="\2060\E0203"], [aria-label*="\2060\E0203"],
+      [label*="\2060\E0204"], [value*="\2060\E0204"], [aria-label*="\2060\E0204"],
+      [label*="\2060\E0205"], [value*="\2060\E0205"], [aria-label*="\2060\E0205"],
+      [label*="\2060\E0206"], [value*="\2060\E0206"], [aria-label*="\2060\E0206"],
+      [label*="\2060\E0207"], [value*="\2060\E0207"], [aria-label*="\2060\E0207"],
+      [label*="\2060\E0208"], [value*="\2060\E0208"], [aria-label*="\2060\E0208"],
+      [label*="\2060\E0209"], [value*="\2060\E0209"], [aria-label*="\2060\E0209"],
+      [label*="\2060\E020A"], [value*="\2060\E020A"], [aria-label*="\2060\E020A"],
+      [label*="\2060\E020B"], [value*="\2060\E020B"], [aria-label*="\2060\E020B"],
+      [label*="\2060\E020C"], [value*="\2060\E020C"], [aria-label*="\2060\E020C"],
+      [label*="\2060\E020D"], [value*="\2060\E020D"], [aria-label*="\2060\E020D"],
+      [label*="\2060\E020E"], [value*="\2060\E020E"], [aria-label*="\2060\E020E"],
+      [label*="\2060\E020F"], [value*="\2060\E020F"], [aria-label*="\2060\E020F"]
+    )::before {
+    background-color: currentColor !important;
+    block-size: 14px !important;
+    content: "" !important;
+    flex: 0 0 14px !important;
+    inline-size: 14px !important;
+    margin-inline-end: 5px !important;
+    mask-image: var(--gnb-group-icon-mask) !important;
+    mask-position: center !important;
+    mask-repeat: no-repeat !important;
+    mask-size: contain !important;
+  }
+
+  tab-group:is(
+      [label*="\2060\E0201"], [label*="\2060\E0202"], [label*="\2060\E0203"],
+      [label*="\2060\E0204"], [label*="\2060\E0205"], [label*="\2060\E0206"],
+      [label*="\2060\E0207"], [label*="\2060\E0208"], [label*="\2060\E0209"],
+      [label*="\2060\E020A"], [label*="\2060\E020B"], [label*="\2060\E020C"],
+      [label*="\2060\E020D"], [label*="\2060\E020E"], [label*="\2060\E020F"]
+    ) .tab-group-label,
+  .tab-group-label {
+    align-items: center !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0201"], tab-group[label*="\2060\E0201"], .tab-group-label:is([label*="\2060\E0201"], [value*="\2060\E0201"], [aria-label*="\2060\E0201"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0202"], tab-group[label*="\2060\E0202"], .tab-group-label:is([label*="\2060\E0202"], [value*="\2060\E0202"], [aria-label*="\2060\E0202"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='m12 3 2.8 5.5 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9L6.4 20l1.1-6.2L3 9.4l6.2-.9Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0203"], tab-group[label*="\2060\E0203"], .tab-group-label:is([label*="\2060\E0203"], [value*="\2060\E0203"], [aria-label*="\2060\E0203"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M21 14a4 4 0 0 1-4 4H8l-5 3 1.6-4.7A7 7 0 0 1 3 12V8a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0204"], tab-group[label*="\2060\E0204"], .tab-group-label:is([label*="\2060\E0204"], [value*="\2060\E0204"], [aria-label*="\2060\E0204"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M9 6V4h6v2M4 6h16v13H4ZM8 12h8'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0205"], tab-group[label*="\2060\E0205"], .tab-group-label:is([label*="\2060\E0205"], [value*="\2060\E0205"], [aria-label*="\2060\E0205"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5Zm0 0V6.5M8 8h8M8 12h6'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0206"], tab-group[label*="\2060\E0206"], .tab-group-label:is([label*="\2060\E0206"], [value*="\2060\E0206"], [aria-label*="\2060\E0206"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='m8 6-6 6 6 6M16 6l6 6-6 6M14 3l-4 18'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0207"], tab-group[label*="\2060\E0207"], .tab-group-label:is([label*="\2060\E0207"], [value*="\2060\E0207"], [aria-label*="\2060\E0207"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M2 12h20M12 2c3 3 4 6 4 10s-1 7-4 10M12 2c-3 3-4 6-4 10s1 7 4 10'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0208"], tab-group[label*="\2060\E0208"], .tab-group-label:is([label*="\2060\E0208"], [value*="\2060\E0208"], [aria-label*="\2060\E0208"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 4h2l2.2 10h10l2-7H6M9 19h.01M17 19h.01'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E0209"], tab-group[label*="\2060\E0209"], .tab-group-label:is([label*="\2060\E0209"], [value*="\2060\E0209"], [aria-label*="\2060\E0209"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M9 18V5l10-2v13M9 8l10-2'/%3E%3Ccircle cx='6.5' cy='19' r='2.5'/%3E%3Ccircle cx='16.5' cy='17' r='2.5'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E020A"], tab-group[label*="\2060\E020A"], .tab-group-label:is([label*="\2060\E020A"], [value*="\2060\E020A"], [aria-label*="\2060\E020A"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E020B"], tab-group[label*="\2060\E020B"], .tab-group-label:is([label*="\2060\E020B"], [value*="\2060\E020B"], [aria-label*="\2060\E020B"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M9 18h6M10 22h4M8.4 14.8A7 7 0 1 1 15.6 14.8c-.9.7-1.6 1.6-1.6 3.2h-4c0-1.6-.7-2.5-1.6-3.2Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E020C"], tab-group[label*="\2060\E020C"], .tab-group-label:is([label*="\2060\E020C"], [value*="\2060\E020C"], [aria-label*="\2060\E020C"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M3 11 12 3l9 8M5 10v10h14V10M9 20v-6h6v6'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E020D"], tab-group[label*="\2060\E020D"], .tab-group-label:is([label*="\2060\E020D"], [value*="\2060\E020D"], [aria-label*="\2060\E020D"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M4 7h3l2-3h6l2 3h3v13H4ZM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E020E"], tab-group[label*="\2060\E020E"], .tab-group-label:is([label*="\2060\E020E"], [value*="\2060\E020E"], [aria-label*="\2060\E020E"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-7-7 17-3-6-6-1-2-3 8 1 5-6Z'/%3E%3C/svg%3E"); }
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label*="\2060\E020F"], tab-group[label*="\2060\E020F"], .tab-group-label:is([label*="\2060\E020F"], [value*="\2060\E020F"], [aria-label*="\2060\E020F"]) { --gnb-group-icon-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M8 8h8a6 6 0 0 1 5.5 8.4l-1.1 2.5a2 2 0 0 1-3.1.8L15 18H9l-2.3 1.7a2 2 0 0 1-3.1-.8l-1.1-2.5A6 6 0 0 1 8 8ZM7 12v4M5 14h4M16 12h.01M19 15h.01'/%3E%3C/svg%3E"); }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item:is(
+      [label$="\2060\E0100"],
+      [label$="\2060\E0101"],
+      [label$="\2060\E0102"],
+      [label$="\2060\E0103"],
+      [label$="\2060\E0104"],
+      [label$="\2060\E0105"],
+      [label$="\2060\E0106"],
+      [label$="\2060\E0107"],
+      [label$="\2060\E0108"]
+    ) .toolbarbutton-text {
+    color: inherit !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0100"] {
+    --gnb-chip-background: #5b5b66;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0101"] {
+    --gnb-chip-background: #0060df;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0102"] {
+    --gnb-chip-background: #c4321f;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0103"] {
+    --gnb-chip-background: #f0b429;
+    --gnb-chip-foreground: #211b00;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0104"] {
+    --gnb-chip-background: #2e7d32;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0105"] {
+    --gnb-chip-background: #c0266d;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0106"] {
+    --gnb-chip-background: #7542e5;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0107"] {
+    --gnb-chip-background: #007a8a;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0108"] {
+    --gnb-chip-background: #c2410c;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item:is(
+      [label$="\2060\E0100"],
+      [label$="\2060\E0101"],
+      [label$="\2060\E0102"],
+      [label$="\2060\E0103"],
+      [label$="\2060\E0104"],
+      [label$="\2060\E0105"],
+      [label$="\2060\E0106"],
+      [label$="\2060\E0107"],
+      [label$="\2060\E0108"]
+    ):hover {
+    background-color: color-mix(in srgb, var(--gnb-chip-background) 88%, white) !important;
+  }
+
+  #PlacesToolbarItems > toolbarbutton.bookmark-item:is(
+      [label$="\2060\E0100"],
+      [label$="\2060\E0101"],
+      [label$="\2060\E0102"],
+      [label$="\2060\E0103"],
+      [label$="\2060\E0104"],
+      [label$="\2060\E0105"],
+      [label$="\2060\E0106"],
+      [label$="\2060\E0107"],
+      [label$="\2060\E0108"]
+    ):active {
+    background-color: color-mix(in srgb, var(--gnb-chip-background) 82%, black) !important;
+  }
+
+  /* v2.9.5 — paleta clara uniforme. As nove cores seguem a mesma base
+     no cabeçalho nativo e no seletor de cores do Firefox. A opção
+     Darker colors aplica exatamente a mesma transformação a todas:
+     84% da cor base + 16% de preto. O modo escuro continua nativo. */
+  @media (prefers-color-scheme: light) {
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0100"] { --gnb-chip-background: #7d7da0; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0101"] { --gnb-chip-background: #386ee7; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0102"] { --gnb-chip-background: #ca4e39; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0103"] { --gnb-chip-background: #fbc755; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0104"] { --gnb-chip-background: #539b46; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0105"] { --gnb-chip-background: #c8417c; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0106"] { --gnb-chip-background: #7c4ff1; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0107"] { --gnb-chip-background: #3f90a4; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0108"] { --gnb-chip-background: #c75a31; }
+
+    :root {
+      --tab-group-gray: #7d7da0 !important;
+      --tab-group-color-gray: #7d7da0 !important;
+      --tab-group-gray-hover: color-mix(in srgb, #7d7da0 90%, white) !important;
+      --tab-group-color-gray-hover: color-mix(in srgb, #7d7da0 90%, white) !important;
+      --tab-group-blue: #386ee7 !important;
+      --tab-group-color-blue: #386ee7 !important;
+      --tab-group-blue-hover: color-mix(in srgb, #386ee7 90%, white) !important;
+      --tab-group-color-blue-hover: color-mix(in srgb, #386ee7 90%, white) !important;
+      --tab-group-red: #ca4e39 !important;
+      --tab-group-color-red: #ca4e39 !important;
+      --tab-group-red-hover: color-mix(in srgb, #ca4e39 90%, white) !important;
+      --tab-group-color-red-hover: color-mix(in srgb, #ca4e39 90%, white) !important;
+      --tab-group-yellow: #fbc755 !important;
+      --tab-group-color-yellow: #fbc755 !important;
+      --tab-group-yellow-hover: color-mix(in srgb, #fbc755 90%, white) !important;
+      --tab-group-color-yellow-hover: color-mix(in srgb, #fbc755 90%, white) !important;
+      --tab-group-green: #539b46 !important;
+      --tab-group-color-green: #539b46 !important;
+      --tab-group-green-hover: color-mix(in srgb, #539b46 90%, white) !important;
+      --tab-group-color-green-hover: color-mix(in srgb, #539b46 90%, white) !important;
+      --tab-group-pink: #c8417c !important;
+      --tab-group-color-pink: #c8417c !important;
+      --tab-group-pink-hover: color-mix(in srgb, #c8417c 90%, white) !important;
+      --tab-group-color-pink-hover: color-mix(in srgb, #c8417c 90%, white) !important;
+      --tab-group-purple: #7c4ff1 !important;
+      --tab-group-color-purple: #7c4ff1 !important;
+      --tab-group-purple-hover: color-mix(in srgb, #7c4ff1 90%, white) !important;
+      --tab-group-color-purple-hover: color-mix(in srgb, #7c4ff1 90%, white) !important;
+      --tab-group-cyan: #3f90a4 !important;
+      --tab-group-color-cyan: #3f90a4 !important;
+      --tab-group-cyan-hover: color-mix(in srgb, #3f90a4 90%, white) !important;
+      --tab-group-color-cyan-hover: color-mix(in srgb, #3f90a4 90%, white) !important;
+      --tab-group-orange: #c75a31 !important;
+      --tab-group-color-orange: #c75a31 !important;
+      --tab-group-orange-hover: color-mix(in srgb, #c75a31 90%, white) !important;
+      --tab-group-color-orange-hover: color-mix(in srgb, #c75a31 90%, white) !important;
+    }
+
+    tab-group[label*="\2060\E0100"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0100"], [value*="\2060\E0100"], [aria-label*="\2060\E0100"]) {
+      background-color: #7d7da0 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0101"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0101"], [value*="\2060\E0101"], [aria-label*="\2060\E0101"]) {
+      background-color: #386ee7 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0102"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0102"], [value*="\2060\E0102"], [aria-label*="\2060\E0102"]) {
+      background-color: #ca4e39 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0103"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0103"], [value*="\2060\E0103"], [aria-label*="\2060\E0103"]) {
+      background-color: #fbc755 !important;
+      color: #211b00 !important;
+    }
+
+    tab-group[label*="\2060\E0104"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0104"], [value*="\2060\E0104"], [aria-label*="\2060\E0104"]) {
+      background-color: #539b46 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0105"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0105"], [value*="\2060\E0105"], [aria-label*="\2060\E0105"]) {
+      background-color: #c8417c !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0106"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0106"], [value*="\2060\E0106"], [aria-label*="\2060\E0106"]) {
+      background-color: #7c4ff1 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0107"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0107"], [value*="\2060\E0107"], [aria-label*="\2060\E0107"]) {
+      background-color: #3f90a4 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0108"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0108"], [value*="\2060\E0108"], [aria-label*="\2060\E0108"]) {
+      background-color: #c75a31 !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0100"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0100"], [value*="\2060\E0100"], [aria-label*="\2060\E0100"]) {
+      background-color: color-mix(in srgb, #7d7da0 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0101"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0101"], [value*="\2060\E0101"], [aria-label*="\2060\E0101"]) {
+      background-color: color-mix(in srgb, #386ee7 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0102"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0102"], [value*="\2060\E0102"], [aria-label*="\2060\E0102"]) {
+      background-color: color-mix(in srgb, #ca4e39 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0103"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0103"], [value*="\2060\E0103"], [aria-label*="\2060\E0103"]) {
+      background-color: color-mix(in srgb, #fbc755 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0104"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0104"], [value*="\2060\E0104"], [aria-label*="\2060\E0104"]) {
+      background-color: color-mix(in srgb, #539b46 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0105"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0105"], [value*="\2060\E0105"], [aria-label*="\2060\E0105"]) {
+      background-color: color-mix(in srgb, #c8417c 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0106"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0106"], [value*="\2060\E0106"], [aria-label*="\2060\E0106"]) {
+      background-color: color-mix(in srgb, #7c4ff1 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0107"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0107"], [value*="\2060\E0107"], [aria-label*="\2060\E0107"]) {
+      background-color: color-mix(in srgb, #3f90a4 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    tab-group[label*="\2060\E0210"][label*="\2060\E0108"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0108"], [value*="\2060\E0108"], [aria-label*="\2060\E0108"]) {
+      background-color: color-mix(in srgb, #c75a31 84%, black) !important;
+      color: #ffffff !important;
+    }
+
+    #tab-group-editor-swatch-gray + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-gray"],
+    .tab-group-editor-swatch[data-color="gray"],
+    .tab-group-editor-swatch[value="gray"],
+    .tab-group-editor-swatch[color="gray"],
+    .tab-group-editor-swatch[data-tab-group-color="gray"],
+    #tab-group-editor-swatch-grey + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-grey"],
+    .tab-group-editor-swatch[data-color="grey"],
+    .tab-group-editor-swatch[value="grey"],
+    .tab-group-editor-swatch[color="grey"],
+    .tab-group-editor-swatch[data-tab-group-color="grey"] {
+      --tabgroup-swatch-color: #7d7da0 !important;
+      background-color: #7d7da0 !important;
+    }
+
+    #tab-group-editor-swatch-blue + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-blue"],
+    .tab-group-editor-swatch[data-color="blue"],
+    .tab-group-editor-swatch[value="blue"],
+    .tab-group-editor-swatch[color="blue"],
+    .tab-group-editor-swatch[data-tab-group-color="blue"] {
+      --tabgroup-swatch-color: #386ee7 !important;
+      background-color: #386ee7 !important;
+    }
+
+    #tab-group-editor-swatch-red + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-red"],
+    .tab-group-editor-swatch[data-color="red"],
+    .tab-group-editor-swatch[value="red"],
+    .tab-group-editor-swatch[color="red"],
+    .tab-group-editor-swatch[data-tab-group-color="red"] {
+      --tabgroup-swatch-color: #ca4e39 !important;
+      background-color: #ca4e39 !important;
+    }
+
+    #tab-group-editor-swatch-yellow + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-yellow"],
+    .tab-group-editor-swatch[data-color="yellow"],
+    .tab-group-editor-swatch[value="yellow"],
+    .tab-group-editor-swatch[color="yellow"],
+    .tab-group-editor-swatch[data-tab-group-color="yellow"] {
+      --tabgroup-swatch-color: #fbc755 !important;
+      background-color: #fbc755 !important;
+    }
+
+    #tab-group-editor-swatch-green + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-green"],
+    .tab-group-editor-swatch[data-color="green"],
+    .tab-group-editor-swatch[value="green"],
+    .tab-group-editor-swatch[color="green"],
+    .tab-group-editor-swatch[data-tab-group-color="green"] {
+      --tabgroup-swatch-color: #539b46 !important;
+      background-color: #539b46 !important;
+    }
+
+    #tab-group-editor-swatch-pink + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-pink"],
+    .tab-group-editor-swatch[data-color="pink"],
+    .tab-group-editor-swatch[value="pink"],
+    .tab-group-editor-swatch[color="pink"],
+    .tab-group-editor-swatch[data-tab-group-color="pink"] {
+      --tabgroup-swatch-color: #c8417c !important;
+      background-color: #c8417c !important;
+    }
+
+    #tab-group-editor-swatch-purple + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-purple"],
+    .tab-group-editor-swatch[data-color="purple"],
+    .tab-group-editor-swatch[value="purple"],
+    .tab-group-editor-swatch[color="purple"],
+    .tab-group-editor-swatch[data-tab-group-color="purple"] {
+      --tabgroup-swatch-color: #7c4ff1 !important;
+      background-color: #7c4ff1 !important;
+    }
+
+    #tab-group-editor-swatch-cyan + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-cyan"],
+    .tab-group-editor-swatch[data-color="cyan"],
+    .tab-group-editor-swatch[value="cyan"],
+    .tab-group-editor-swatch[color="cyan"],
+    .tab-group-editor-swatch[data-tab-group-color="cyan"] {
+      --tabgroup-swatch-color: #3f90a4 !important;
+      background-color: #3f90a4 !important;
+    }
+
+    #tab-group-editor-swatch-orange + .tab-group-editor-swatch,
+    .tab-group-editor-swatch[for="tab-group-editor-swatch-orange"],
+    .tab-group-editor-swatch[data-color="orange"],
+    .tab-group-editor-swatch[value="orange"],
+    .tab-group-editor-swatch[color="orange"],
+    .tab-group-editor-swatch[data-tab-group-color="orange"] {
+      --tabgroup-swatch-color: #c75a31 !important;
+      background-color: #c75a31 !important;
+    }
+
+  }
+}
+
+/* v2.9.5 — paleta canônica. Light mode usa exatamente a mesma base em
+   popup, favoritos, grupos e amostras do editor nativo. Darker colors =
+   80% da cor base + 20% de preto. O dark mode do Firefox não é alterado. */
+@-moz-document url("chrome://browser/content/browser.xhtml") {
+  @media (prefers-color-scheme: light) {
+    :root {
+      --tab-group-blue: #3b82f6 !important;
+      --tab-group-blue-invert: #3b82f6 !important;
+      --tab-group-blue-pale: color-mix(in srgb, #3b82f6 18%, white) !important;
+      --tab-group-blue-text: #ffffff !important;
+      --tab-group-blue-text-invert: #ffffff !important;
+      --tab-group-blue-hover: color-mix(in srgb, #3b82f6 90%, white) !important;
+      --tab-group-color-blue: #3b82f6 !important;
+      --tab-group-color-blue-invert: #3b82f6 !important;
+      --tab-group-color-blue-pale: color-mix(in srgb, #3b82f6 18%, white) !important;
+      --tab-group-purple: #8b5cf6 !important;
+      --tab-group-purple-invert: #8b5cf6 !important;
+      --tab-group-purple-pale: color-mix(in srgb, #8b5cf6 18%, white) !important;
+      --tab-group-purple-text: #ffffff !important;
+      --tab-group-purple-text-invert: #ffffff !important;
+      --tab-group-purple-hover: color-mix(in srgb, #8b5cf6 90%, white) !important;
+      --tab-group-color-purple: #8b5cf6 !important;
+      --tab-group-color-purple-invert: #8b5cf6 !important;
+      --tab-group-color-purple-pale: color-mix(in srgb, #8b5cf6 18%, white) !important;
+      --tab-group-cyan: #06a8b7 !important;
+      --tab-group-cyan-invert: #06a8b7 !important;
+      --tab-group-cyan-pale: color-mix(in srgb, #06a8b7 18%, white) !important;
+      --tab-group-cyan-text: #ffffff !important;
+      --tab-group-cyan-text-invert: #ffffff !important;
+      --tab-group-cyan-hover: color-mix(in srgb, #06a8b7 90%, white) !important;
+      --tab-group-color-cyan: #06a8b7 !important;
+      --tab-group-color-cyan-invert: #06a8b7 !important;
+      --tab-group-color-cyan-pale: color-mix(in srgb, #06a8b7 18%, white) !important;
+      --tab-group-orange: #f07825 !important;
+      --tab-group-orange-invert: #f07825 !important;
+      --tab-group-orange-pale: color-mix(in srgb, #f07825 18%, white) !important;
+      --tab-group-orange-text: #ffffff !important;
+      --tab-group-orange-text-invert: #ffffff !important;
+      --tab-group-orange-hover: color-mix(in srgb, #f07825 90%, white) !important;
+      --tab-group-color-orange: #f07825 !important;
+      --tab-group-color-orange-invert: #f07825 !important;
+      --tab-group-color-orange-pale: color-mix(in srgb, #f07825 18%, white) !important;
+      --tab-group-yellow: #eab308 !important;
+      --tab-group-yellow-invert: #eab308 !important;
+      --tab-group-yellow-pale: color-mix(in srgb, #eab308 18%, white) !important;
+      --tab-group-yellow-text: #211b00 !important;
+      --tab-group-yellow-text-invert: #211b00 !important;
+      --tab-group-yellow-hover: color-mix(in srgb, #eab308 90%, white) !important;
+      --tab-group-color-yellow: #eab308 !important;
+      --tab-group-color-yellow-invert: #eab308 !important;
+      --tab-group-color-yellow-pale: color-mix(in srgb, #eab308 18%, white) !important;
+      --tab-group-pink: #ec4899 !important;
+      --tab-group-pink-invert: #ec4899 !important;
+      --tab-group-pink-pale: color-mix(in srgb, #ec4899 18%, white) !important;
+      --tab-group-pink-text: #ffffff !important;
+      --tab-group-pink-text-invert: #ffffff !important;
+      --tab-group-pink-hover: color-mix(in srgb, #ec4899 90%, white) !important;
+      --tab-group-color-pink: #ec4899 !important;
+      --tab-group-color-pink-invert: #ec4899 !important;
+      --tab-group-color-pink-pale: color-mix(in srgb, #ec4899 18%, white) !important;
+      --tab-group-green: #22a559 !important;
+      --tab-group-green-invert: #22a559 !important;
+      --tab-group-green-pale: color-mix(in srgb, #22a559 18%, white) !important;
+      --tab-group-green-text: #ffffff !important;
+      --tab-group-green-text-invert: #ffffff !important;
+      --tab-group-green-hover: color-mix(in srgb, #22a559 90%, white) !important;
+      --tab-group-color-green: #22a559 !important;
+      --tab-group-color-green-invert: #22a559 !important;
+      --tab-group-color-green-pale: color-mix(in srgb, #22a559 18%, white) !important;
+      --tab-group-gray: #8b8b94 !important;
+      --tab-group-gray-invert: #8b8b94 !important;
+      --tab-group-gray-pale: color-mix(in srgb, #8b8b94 18%, white) !important;
+      --tab-group-gray-text: #ffffff !important;
+      --tab-group-gray-text-invert: #ffffff !important;
+      --tab-group-gray-hover: color-mix(in srgb, #8b8b94 90%, white) !important;
+      --tab-group-color-gray: #8b8b94 !important;
+      --tab-group-color-gray-invert: #8b8b94 !important;
+      --tab-group-color-gray-pale: color-mix(in srgb, #8b8b94 18%, white) !important;
+      --tab-group-red: #ef4444 !important;
+      --tab-group-red-invert: #ef4444 !important;
+      --tab-group-red-pale: color-mix(in srgb, #ef4444 18%, white) !important;
+      --tab-group-red-text: #ffffff !important;
+      --tab-group-red-text-invert: #ffffff !important;
+      --tab-group-red-hover: color-mix(in srgb, #ef4444 90%, white) !important;
+      --tab-group-color-red: #ef4444 !important;
+      --tab-group-color-red-invert: #ef4444 !important;
+      --tab-group-color-red-pale: color-mix(in srgb, #ef4444 18%, white) !important;
+      --tab-group-grey: #8b8b94 !important;
+      --tab-group-color-grey: #8b8b94 !important;
+    }
+
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0100"] { --gnb-chip-background: #8b8b94; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0101"] { --gnb-chip-background: #3b82f6; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0102"] { --gnb-chip-background: #ef4444; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0103"] { --gnb-chip-background: #eab308; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0104"] { --gnb-chip-background: #22a559; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0105"] { --gnb-chip-background: #ec4899; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0106"] { --gnb-chip-background: #8b5cf6; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0107"] { --gnb-chip-background: #06a8b7; }
+    #PlacesToolbarItems > toolbarbutton.bookmark-item[label$="\2060\E0108"] { --gnb-chip-background: #f07825; }
+
+    #tab-group-editor-swatch-blue + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-blue"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(1) {
+      --tabgroup-swatch-color: #3b82f6 !important;
+      --tabgroup-swatch-color-invert: #3b82f6 !important;
+      background-color: #3b82f6 !important;
+    }
+    #tab-group-editor-swatch-purple + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-purple"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(2) {
+      --tabgroup-swatch-color: #8b5cf6 !important;
+      --tabgroup-swatch-color-invert: #8b5cf6 !important;
+      background-color: #8b5cf6 !important;
+    }
+    #tab-group-editor-swatch-cyan + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-cyan"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(3) {
+      --tabgroup-swatch-color: #06a8b7 !important;
+      --tabgroup-swatch-color-invert: #06a8b7 !important;
+      background-color: #06a8b7 !important;
+    }
+    #tab-group-editor-swatch-orange + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-orange"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(4) {
+      --tabgroup-swatch-color: #f07825 !important;
+      --tabgroup-swatch-color-invert: #f07825 !important;
+      background-color: #f07825 !important;
+    }
+    #tab-group-editor-swatch-yellow + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-yellow"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(5) {
+      --tabgroup-swatch-color: #eab308 !important;
+      --tabgroup-swatch-color-invert: #eab308 !important;
+      background-color: #eab308 !important;
+    }
+    #tab-group-editor-swatch-pink + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-pink"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(6) {
+      --tabgroup-swatch-color: #ec4899 !important;
+      --tabgroup-swatch-color-invert: #ec4899 !important;
+      background-color: #ec4899 !important;
+    }
+    #tab-group-editor-swatch-green + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-green"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(7) {
+      --tabgroup-swatch-color: #22a559 !important;
+      --tabgroup-swatch-color-invert: #22a559 !important;
+      background-color: #22a559 !important;
+    }
+    #tab-group-editor-swatch-gray + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-gray"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(8) {
+      --tabgroup-swatch-color: #8b8b94 !important;
+      --tabgroup-swatch-color-invert: #8b8b94 !important;
+      background-color: #8b8b94 !important;
+    }
+    #tab-group-editor-swatch-red + label.tab-group-editor-swatch,
+    .tab-group-editor-swatches > label.tab-group-editor-swatch[for="tab-group-editor-swatch-red"],
+    .tab-group-editor-swatches > label.tab-group-editor-swatch:nth-of-type(9) {
+      --tabgroup-swatch-color: #ef4444 !important;
+      --tabgroup-swatch-color-invert: #ef4444 !important;
+      background-color: #ef4444 !important;
+    }
+    tab-group[label*="\2060\E0100"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0100"], [value*="\2060\E0100"], [aria-label*="\2060\E0100"]) {
+      background-color: #8b8b94 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0100"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0100"], [value*="\2060\E0100"], [aria-label*="\2060\E0100"]) {
+      background-color: color-mix(in srgb, #8b8b94 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0101"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0101"], [value*="\2060\E0101"], [aria-label*="\2060\E0101"]) {
+      background-color: #3b82f6 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0101"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0101"], [value*="\2060\E0101"], [aria-label*="\2060\E0101"]) {
+      background-color: color-mix(in srgb, #3b82f6 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0102"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0102"], [value*="\2060\E0102"], [aria-label*="\2060\E0102"]) {
+      background-color: #ef4444 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0102"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0102"], [value*="\2060\E0102"], [aria-label*="\2060\E0102"]) {
+      background-color: color-mix(in srgb, #ef4444 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0103"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0103"], [value*="\2060\E0103"], [aria-label*="\2060\E0103"]) {
+      background-color: #eab308 !important;
+      color: #211b00 !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0103"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0103"], [value*="\2060\E0103"], [aria-label*="\2060\E0103"]) {
+      background-color: color-mix(in srgb, #eab308 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0104"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0104"], [value*="\2060\E0104"], [aria-label*="\2060\E0104"]) {
+      background-color: #22a559 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0104"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0104"], [value*="\2060\E0104"], [aria-label*="\2060\E0104"]) {
+      background-color: color-mix(in srgb, #22a559 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0105"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0105"], [value*="\2060\E0105"], [aria-label*="\2060\E0105"]) {
+      background-color: #ec4899 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0105"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0105"], [value*="\2060\E0105"], [aria-label*="\2060\E0105"]) {
+      background-color: color-mix(in srgb, #ec4899 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0106"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0106"], [value*="\2060\E0106"], [aria-label*="\2060\E0106"]) {
+      background-color: #8b5cf6 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0106"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0106"], [value*="\2060\E0106"], [aria-label*="\2060\E0106"]) {
+      background-color: color-mix(in srgb, #8b5cf6 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0107"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0107"], [value*="\2060\E0107"], [aria-label*="\2060\E0107"]) {
+      background-color: #06a8b7 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0107"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0107"], [value*="\2060\E0107"], [aria-label*="\2060\E0107"]) {
+      background-color: color-mix(in srgb, #06a8b7 80%, black) !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0108"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0108"], [value*="\2060\E0108"], [aria-label*="\2060\E0108"]) {
+      background-color: #f07825 !important;
+      color: #ffffff !important;
+    }
+    tab-group[label*="\2060\E0210"][label*="\2060\E0108"] .tab-group-label,
+    .tab-group-label:is([label*="\2060\E0210"], [value*="\2060\E0210"], [aria-label*="\2060\E0210"]):is([label*="\2060\E0108"], [value*="\2060\E0108"], [aria-label*="\2060\E0108"]) {
+      background-color: color-mix(in srgb, #f07825 80%, black) !important;
+      color: #ffffff !important;
+    }
+  }
+}

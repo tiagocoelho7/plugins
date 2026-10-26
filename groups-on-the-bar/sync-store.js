@@ -1,0 +1,961 @@
+"use strict";
+
+// Formato independente do estado local. Cada grupo usa um item de metadados e
+// quantos fragmentos forem necessários para as abas. Isso evita o limite de
+// 8 KiB por item do storage.sync sem misturar IDs locais de janelas, abas ou
+// favoritos entre computadores.
+(function exposeSyncStore(root) {
+  const FORMAT_VERSION = 1;
+  const KEY_PREFIX = "gnb.sync.v1.group:";
+  const BACKUP_KEY_PREFIX = "gnb.sync.v1.backup:";
+  const TOMBSTONE_ARCHIVE_FORMAT_VERSION = 2;
+  const TOMBSTONE_ARCHIVE_KEY_PREFIX = "gnb.sync.v2.tombstone-archive:";
+  const ITEM_LIMIT_BYTES = 8192;
+  const ITEM_TARGET_BYTES = 7800;
+  const TOTAL_LIMIT_BYTES = 102400;
+  const ITEM_COUNT_LIMIT = 512;
+  const MAX_FUTURE_CLOCK_SKEW_MS = 24 * 60 * 60 * 1000;
+  const RECORD_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/;
+  const LOWERCASE_UUID_PATTERN =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+  const MAX_COOKIE_STORE_ID_LENGTH = 128;
+  // Compatibilidade de rollout: versões v3 anteriores não conhecem o campo
+  // intentionallyEmpty. No wire do Firefox Sync, um grupo vazio deliberado
+  // usa uma URL HTTPS reservada no domínio .invalid já pertencente à extensão.
+  // A v3.0.0 real aceita HTTP(S) como URL restaurável, portanto não cai na
+  // proteção contra snapshot degradado e não ressuscita a URL removida. O ID
+  // torna o conteúdo distinto entre grupos. A v3.0.6 reconhece o sentinel
+  // mesmo se um peer antigo o republicar sem o boolean intentionallyEmpty.
+  const INTENTIONAL_EMPTY_URL_PREFIX = "https://grupos-na-barra.invalid/empty/";
+
+  function utf8ByteLength(value) {
+    const text = String(value);
+    if (typeof TextEncoder === "function") {
+      return new TextEncoder().encode(text).length;
+    }
+    return unescape(encodeURIComponent(text)).length;
+  }
+
+  function itemBytes(key, value) {
+    return utf8ByteLength(key) + utf8ByteLength(JSON.stringify(value));
+  }
+
+  function storageBytes(items) {
+    return Object.entries(items || {}).reduce(
+      (total, [key, value]) => total + itemBytes(key, value),
+      0
+    );
+  }
+
+  function hashString(value) {
+    const bytes =
+      typeof TextEncoder === "function"
+        ? new TextEncoder().encode(String(value))
+        : Array.from(unescape(encodeURIComponent(String(value))), (char) => char.charCodeAt(0));
+    let hash = 0x811c9dc5;
+    for (const byte of bytes) {
+      hash ^= byte;
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    return hash.toString(16).padStart(8, "0");
+  }
+
+  // Segundo fingerprint independente para detectar corrupção acidental com
+  // uma margem muito maior que o FNV-1a de 32 bits legado. O hash antigo é
+  // mantido no wire para que clientes v3 já publicados continuem compatíveis;
+  // clientes novos verificam ambos quando o campo de 64 bits estiver presente.
+  function hashString64(value) {
+    const bytes =
+      typeof TextEncoder === "function"
+        ? new TextEncoder().encode(String(value))
+        : Array.from(unescape(encodeURIComponent(String(value))), (char) => char.charCodeAt(0));
+    let hash = 0xcbf29ce484222325n;
+    for (const byte of bytes) {
+      hash ^= BigInt(byte);
+      hash = BigInt.asUintN(64, hash * 0x100000001b3n);
+    }
+    return hash.toString(16).padStart(16, "0");
+  }
+
+  function validRecordId(id) {
+    return typeof id === "string" && RECORD_ID_PATTERN.test(id);
+  }
+
+  function safeId(id) {
+    const value = String(id);
+    if (!validRecordId(value)) {
+      throw new Error("Identificador de grupo inválido para o Firefox Sync.");
+    }
+    return encodeURIComponent(value);
+  }
+
+  function groupPrefix(id) {
+    return `${KEY_PREFIX}${safeId(id)}:`;
+  }
+
+  function intentionalEmptyWireUrl(id) {
+    return `${INTENTIONAL_EMPTY_URL_PREFIX}${safeId(id)}`;
+  }
+
+  function hasIntentionalEmptyWireSentinel(id, tabs) {
+    return (
+      Array.isArray(tabs) &&
+      tabs.length === 1 &&
+      tabs[0]?.url === intentionalEmptyWireUrl(id)
+    );
+  }
+
+  function decodeIntentionalEmptyState(id, tabs, intentionallyEmpty) {
+    const sentinel = hasIntentionalEmptyWireSentinel(id, tabs);
+    return {
+      intentionallyEmpty: intentionallyEmpty === true || sentinel,
+      tabs: sentinel ? [{ url: "about:blank" }] : tabs
+    };
+  }
+
+  function metaKey(id) {
+    return `${groupPrefix(id)}meta`;
+  }
+
+  function chunkKey(id, index) {
+    return `${groupPrefix(id)}tabs:${index}`;
+  }
+
+  function isSyncKey(key) {
+    return (
+      typeof key === "string" &&
+      (key.startsWith(KEY_PREFIX) ||
+        key.startsWith(BACKUP_KEY_PREFIX) ||
+        key.startsWith(TOMBSTONE_ARCHIVE_KEY_PREFIX))
+    );
+  }
+
+  function backupMetaKey() {
+    return `${BACKUP_KEY_PREFIX}meta`;
+  }
+
+  function backupChunkKey(index) {
+    return `${BACKUP_KEY_PREFIX}data:${index}`;
+  }
+
+  function backupKeys(items) {
+    return Object.keys(items || {}).filter((key) => key.startsWith(BACKUP_KEY_PREFIX));
+  }
+
+  function tombstoneArchiveSegmentKey(segmentId) {
+    return `${TOMBSTONE_ARCHIVE_KEY_PREFIX}${segmentId}`;
+  }
+
+  function tombstoneArchiveKeys(items) {
+    return Object.keys(items || {}).filter((key) => key.startsWith(TOMBSTONE_ARCHIVE_KEY_PREFIX));
+  }
+
+  function keysForId(items, id) {
+    const prefix = groupPrefix(id);
+    return Object.keys(items || {}).filter((key) => key.startsWith(prefix));
+  }
+
+  function sharedGroupData(group) {
+    const id = String(group.id);
+    const intentionallyEmpty = group.intentionallyEmpty === true;
+    const tabs = intentionallyEmpty
+      ? [{ url: intentionalEmptyWireUrl(id) }]
+      : Array.isArray(group.tabs)
+        ? group.tabs.map((tab) => {
+            const sharedTab = {
+              url: typeof tab?.url === "string" || tab?.url === null ? tab.url : null
+            };
+            if (
+              typeof tab?.cookieStoreId === "string" &&
+              tab.cookieStoreId.length <= MAX_COOKIE_STORE_ID_LENGTH &&
+              /^firefox-container-[a-z0-9_-]+$/i.test(tab.cookieStoreId)
+            ) {
+              sharedTab.cookieStoreId = tab.cookieStoreId;
+            }
+            return sharedTab;
+          })
+        : [];
+
+    return {
+      id,
+      title: String(group.title || ""),
+      color: String(group.color || "grey"),
+      icon: String(group.icon || "none"),
+      darkerColors: group.darkerColors === true,
+      keepAtTop: group.keepAtTop === true,
+      keepAtTopOrder: Number.isFinite(group.keepAtTopOrder) ? group.keepAtTopOrder : null,
+      archived: group.archived === true,
+      intentionallyEmpty,
+      tabs,
+      skippedTabs: Number.isInteger(group.skippedTabs) ? Math.max(0, group.skippedTabs) : 0,
+      createdAt: Number.isFinite(group.createdAt) ? group.createdAt : 0
+    };
+  }
+
+  function groupFingerprint(group) {
+    return hashString(JSON.stringify(sharedGroupData(group)));
+  }
+
+  function compareVersions(left, right) {
+    const leftTime = Number.isFinite(left?.updatedAt) ? left.updatedAt : 0;
+    const rightTime = Number.isFinite(right?.updatedAt) ? right.updatedAt : 0;
+    if (leftTime !== rightTime) {
+      return leftTime < rightTime ? -1 : 1;
+    }
+
+    const leftRevision = String(left?.revision || "");
+    const rightRevision = String(right?.revision || "");
+    if (leftRevision === rightRevision) {
+      return 0;
+    }
+    return leftRevision < rightRevision ? -1 : 1;
+  }
+
+  function chunkValue(id, revision, index, total, data) {
+    return {
+      format: FORMAT_VERSION,
+      kind: "tabs",
+      id,
+      revision,
+      index,
+      total,
+      data
+    };
+  }
+
+  function splitPayload(id, revision, payload) {
+    const fragments = [];
+    let offset = 0;
+
+    while (offset < payload.length || (!payload.length && !fragments.length)) {
+      let low = offset + (offset < payload.length ? 1 : 0);
+      let high = payload.length;
+      let best = offset;
+      const index = fragments.length;
+
+      while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        const candidate = payload.slice(offset, middle);
+        const size = itemBytes(
+          chunkKey(id, index),
+          chunkValue(id, revision, index, ITEM_COUNT_LIMIT, candidate)
+        );
+        if (size <= ITEM_TARGET_BYTES) {
+          best = middle;
+          low = middle + 1;
+        } else {
+          high = middle - 1;
+        }
+      }
+
+      if (best === offset && offset < payload.length) {
+        throw new Error("Uma aba contém dados grandes demais para o Firefox Sync.");
+      }
+
+      fragments.push(payload.slice(offset, best));
+      offset = best;
+      if (fragments.length >= ITEM_COUNT_LIMIT) {
+        throw new Error("Este grupo ultrapassa a quantidade de itens permitida pelo Firefox Sync.");
+      }
+    }
+
+    return fragments;
+  }
+
+  function backupChunkValue(snapshotId, index, total, data) {
+    return {
+      format: FORMAT_VERSION,
+      kind: "backup-data",
+      snapshotId,
+      index,
+      total,
+      data
+    };
+  }
+
+  function splitBackupPayload(snapshotId, payload) {
+    const fragments = [];
+    let offset = 0;
+
+    while (offset < payload.length || (!payload.length && !fragments.length)) {
+      let low = offset + (offset < payload.length ? 1 : 0);
+      let high = payload.length;
+      let best = offset;
+      const index = fragments.length;
+
+      while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        const candidate = payload.slice(offset, middle);
+        const size = itemBytes(
+          backupChunkKey(index),
+          backupChunkValue(snapshotId, index, ITEM_COUNT_LIMIT, candidate)
+        );
+        if (size <= ITEM_TARGET_BYTES) {
+          best = middle;
+          low = middle + 1;
+        } else {
+          high = middle - 1;
+        }
+      }
+
+      if (best === offset && offset < payload.length) {
+        throw new Error("O backup contém dados grandes demais para o Firefox Sync.");
+      }
+
+      fragments.push(payload.slice(offset, best));
+      offset = best;
+      if (fragments.length >= ITEM_COUNT_LIMIT) {
+        throw new Error("O backup ultrapassa a quantidade de itens permitida pelo Firefox Sync.");
+      }
+    }
+
+    return fragments;
+  }
+
+  function bytesToBase64(bytes) {
+    if (typeof btoa !== "function") {
+      throw new Error("Codificação Base64 indisponível para o arquivo de exclusões.");
+    }
+    let binary = "";
+    const chunkSize = 0x4000;
+    for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+      const slice = bytes.subarray(offset, Math.min(bytes.length, offset + chunkSize));
+      let chunk = "";
+      for (const byte of slice) chunk += String.fromCharCode(byte);
+      binary += chunk;
+    }
+    return btoa(binary);
+  }
+
+  function base64ToBytes(value) {
+    if (typeof atob !== "function" || typeof value !== "string") {
+      return null;
+    }
+    let binary;
+    try {
+      binary = atob(value);
+    } catch (_error) {
+      return null;
+    }
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+    return bytes;
+  }
+
+  function uuidToBytes(id) {
+    if (typeof id !== "string" || !LOWERCASE_UUID_PATTERN.test(id)) {
+      return null;
+    }
+    const hex = id.replaceAll("-", "");
+    const bytes = new Uint8Array(16);
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16);
+    }
+    return bytes;
+  }
+
+  function bytesToUuid(bytes, offset) {
+    if (!(bytes instanceof Uint8Array) || offset < 0 || offset + 16 > bytes.length) {
+      return null;
+    }
+    let hex = "";
+    for (let index = offset; index < offset + 16; index += 1) {
+      hex += bytes[index].toString(16).padStart(2, "0");
+    }
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  }
+
+  function compactTombstoneArchiveIds(ids) {
+    const unique = [...new Set((Array.isArray(ids) ? ids : []).map(String))]
+      .filter(validRecordId)
+      .sort();
+    const uuidBytes = [];
+    const otherIds = [];
+    for (const id of unique) {
+      const bytes = uuidToBytes(id);
+      if (!bytes) {
+        otherIds.push(id);
+        continue;
+      }
+      for (const byte of bytes) uuidBytes.push(byte);
+    }
+    return {
+      count: unique.length,
+      payload: JSON.stringify({
+        v: 1,
+        u: bytesToBase64(Uint8Array.from(uuidBytes)),
+        o: otherIds
+      })
+    };
+  }
+
+  function expandTombstoneArchiveIds(payload) {
+    let decoded;
+    try {
+      decoded = JSON.parse(payload);
+    } catch (_error) {
+      return null;
+    }
+    if (!decoded || decoded.v !== 1 || typeof decoded.u !== "string" || !Array.isArray(decoded.o)) {
+      return null;
+    }
+
+    const uuidBytes = base64ToBytes(decoded.u);
+    if (!uuidBytes || uuidBytes.length % 16 !== 0) {
+      return null;
+    }
+    const ids = [];
+    for (let offset = 0; offset < uuidBytes.length; offset += 16) {
+      const id = bytesToUuid(uuidBytes, offset);
+      if (!id || !validRecordId(id)) return null;
+      ids.push(id);
+    }
+    for (const candidate of decoded.o) {
+      if (!validRecordId(candidate)) return null;
+      ids.push(candidate);
+    }
+    const unique = [...new Set(ids)].sort();
+    if (unique.length !== ids.length) {
+      return null;
+    }
+    return unique;
+  }
+
+  function validateItems(items) {
+    const entries = Object.entries(items);
+    if (entries.length > ITEM_COUNT_LIMIT) {
+      throw new Error("O grupo ultrapassa a quantidade de itens permitida pelo Firefox Sync.");
+    }
+
+    for (const [key, value] of entries) {
+      if (itemBytes(key, value) > ITEM_LIMIT_BYTES) {
+        throw new Error("Um fragmento do grupo ultrapassa 8 KiB no Firefox Sync.");
+      }
+    }
+
+    if (storageBytes(items) > TOTAL_LIMIT_BYTES) {
+      throw new Error("O grupo sozinho ultrapassa o espaço total do Firefox Sync.");
+    }
+    return items;
+  }
+
+  function encodeGroup(group, version) {
+    const shared = sharedGroupData(group);
+    const revision = String(version?.revision || "");
+    const updatedAt = Number(version?.updatedAt);
+    if (!validRecordId(shared.id) || !revision || !Number.isFinite(updatedAt)) {
+      throw new Error("Registro de sincronização inválido.");
+    }
+
+    const payload = JSON.stringify(shared.tabs);
+    const fragments = splitPayload(shared.id, revision, payload);
+    const items = {};
+
+    fragments.forEach((fragment, index) => {
+      items[chunkKey(shared.id, index)] = chunkValue(
+        shared.id,
+        revision,
+        index,
+        fragments.length,
+        fragment
+      );
+    });
+
+    items[metaKey(shared.id)] = {
+      format: FORMAT_VERSION,
+      kind: "group",
+      id: shared.id,
+      revision,
+      updatedAt,
+      deleted: false,
+      title: shared.title,
+      color: shared.color,
+      icon: shared.icon,
+      darkerColors: shared.darkerColors,
+      keepAtTop: shared.keepAtTop,
+      keepAtTopOrder: shared.keepAtTopOrder,
+      archived: shared.archived,
+      intentionallyEmpty: shared.intentionallyEmpty,
+      skippedTabs: shared.skippedTabs,
+      createdAt: shared.createdAt,
+      chunkCount: fragments.length,
+      tabsHash: hashString(payload),
+      tabsHash64: hashString64(payload)
+    };
+
+    return validateItems(items);
+  }
+
+  function encodeTombstone(tombstone) {
+    const id = String(tombstone?.id || "");
+    const revision = String(tombstone?.revision || "");
+    const updatedAt = Number(tombstone?.updatedAt);
+    if (!validRecordId(id) || !revision || !Number.isFinite(updatedAt)) {
+      throw new Error("Exclusão sincronizada inválida.");
+    }
+
+    const value = {
+      format: FORMAT_VERSION,
+      kind: "group",
+      id,
+      revision,
+      updatedAt,
+      deleted: true
+    };
+    const deletedAt = Number.isFinite(tombstone.deletedAt) ? tombstone.deletedAt : updatedAt;
+    // A grande maioria das exclusões locais nasce com deletedAt === updatedAt.
+    // O campo sempre foi opcional na leitura (fallback para updatedAt), então
+    // omiti-lo nesse caso economiza cota sem quebrar clientes v3 antigos.
+    if (deletedAt !== updatedAt) {
+      value.deletedAt = deletedAt;
+    }
+    return validateItems({ [metaKey(id)]: value });
+  }
+
+  function encodeTombstoneArchive(ids, createdAt = Date.now()) {
+    const cleanCreatedAt = Number.isFinite(createdAt) ? Math.trunc(createdAt) : Date.now();
+    const unique = [...new Set((Array.isArray(ids) ? ids : []).map(String))]
+      .filter(validRecordId)
+      .sort();
+    const items = {};
+    let offset = 0;
+    let segmentIndex = 0;
+
+    while (offset < unique.length) {
+      let low = offset + 1;
+      let high = unique.length;
+      let best = offset;
+      let bestPayload = null;
+      let bestValue = null;
+      let bestKey = null;
+
+      while (low <= high) {
+        const middle = Math.floor((low + high) / 2);
+        const compact = compactTombstoneArchiveIds(unique.slice(offset, middle));
+        const payload = compact.payload;
+        const segmentId = `${cleanCreatedAt.toString(36)}-${segmentIndex.toString(36)}-${hashString64(payload)}`;
+        const key = tombstoneArchiveSegmentKey(segmentId);
+        const value = {
+          format: TOMBSTONE_ARCHIVE_FORMAT_VERSION,
+          kind: "tombstone-archive",
+          segmentId,
+          createdAt: cleanCreatedAt,
+          idCount: compact.count,
+          data: payload,
+          dataHash: hashString(payload),
+          dataHash64: hashString64(payload)
+        };
+        if (itemBytes(key, value) <= ITEM_TARGET_BYTES) {
+          best = middle;
+          bestPayload = payload;
+          bestValue = value;
+          bestKey = key;
+          low = middle + 1;
+        } else {
+          high = middle - 1;
+        }
+      }
+
+      if (best === offset || !bestPayload || !bestValue || !bestKey) {
+        throw new Error("O arquivo compacto de exclusões contém um identificador grande demais para o Firefox Sync.");
+      }
+      items[bestKey] = bestValue;
+      offset = best;
+      segmentIndex += 1;
+      if (segmentIndex > ITEM_COUNT_LIMIT) {
+        throw new Error("O arquivo compacto de exclusões ultrapassa a quantidade de itens do Firefox Sync.");
+      }
+    }
+    return validateItems(items);
+  }
+
+  function decodeTombstoneArchive(items) {
+    const source = items && typeof items === "object" ? items : {};
+    const keys = tombstoneArchiveKeys(source);
+    if (!keys.length) {
+      return null;
+    }
+    const archivedAtById = new Map();
+    let newestCreatedAt = 0;
+    for (const key of keys) {
+      const segment = source[key];
+      if (
+        !segment ||
+        segment.format !== TOMBSTONE_ARCHIVE_FORMAT_VERSION ||
+        segment.kind !== "tombstone-archive" ||
+        typeof segment.segmentId !== "string" ||
+        !segment.segmentId ||
+        key !== tombstoneArchiveSegmentKey(segment.segmentId) ||
+        !Number.isFinite(segment.createdAt) ||
+        !Number.isInteger(segment.idCount) ||
+        segment.idCount < 1 ||
+        typeof segment.data !== "string" ||
+        typeof segment.dataHash !== "string" ||
+        typeof segment.dataHash64 !== "string" ||
+        hashString(segment.data) !== segment.dataHash ||
+        hashString64(segment.data) !== segment.dataHash64
+      ) {
+        return null;
+      }
+      const segmentIds = expandTombstoneArchiveIds(segment.data);
+      if (!segmentIds || segmentIds.length !== segment.idCount) {
+        return null;
+      }
+      for (const id of segmentIds) {
+        const previous = archivedAtById.get(id);
+        if (!Number.isFinite(previous) || segment.createdAt < previous) {
+          archivedAtById.set(id, segment.createdAt);
+        }
+      }
+      newestCreatedAt = Math.max(newestCreatedAt, segment.createdAt);
+    }
+    const uniqueIds = [...archivedAtById.keys()].sort();
+    return {
+      createdAt: newestCreatedAt,
+      idCount: uniqueIds.length,
+      segmentCount: keys.length,
+      ids: uniqueIds,
+      entries: uniqueIds.map((id) => ({ id, archivedAt: archivedAtById.get(id) }))
+    };
+  }
+
+  function individualTombstones(items, now = Date.now()) {
+    const source = items && typeof items === "object" ? items : {};
+    const records = [];
+    for (const [key, meta] of Object.entries(source)) {
+      if (!validMeta(key, meta, now) || meta.deleted !== true) {
+        continue;
+      }
+      records.push({
+        id: meta.id,
+        revision: meta.revision,
+        updatedAt: meta.updatedAt,
+        deletedAt: Number.isFinite(meta.deletedAt) ? meta.deletedAt : meta.updatedAt
+      });
+    }
+    return records;
+  }
+
+  function compactBackupGroup(group) {
+    const shared = sharedGroupData(group);
+    return [
+      shared.id,
+      shared.title,
+      shared.color,
+      shared.icon,
+      shared.keepAtTop ? 1 : 0,
+      shared.archived ? 1 : 0,
+      shared.createdAt,
+      shared.skippedTabs,
+      shared.tabs.map((tab) =>
+        tab.cookieStoreId ? [tab.url, tab.cookieStoreId] : [tab.url]
+      ),
+      shared.keepAtTopOrder,
+      shared.darkerColors ? 1 : 0,
+      shared.intentionallyEmpty ? 1 : 0
+    ];
+  }
+
+  function encodeBackup(groups, createdAt = Date.now()) {
+    const cleanCreatedAt = Number.isFinite(createdAt) ? Math.trunc(createdAt) : Date.now();
+    const compactGroups = Array.isArray(groups) ? groups.map(compactBackupGroup) : [];
+    if (!compactGroups.length) {
+      throw new Error("Não há grupos válidos para incluir no backup.");
+    }
+
+    const payload = JSON.stringify({ v: FORMAT_VERSION, g: compactGroups });
+    const snapshotId = `${cleanCreatedAt.toString(36)}-${hashString(payload)}`;
+    const fragments = splitBackupPayload(snapshotId, payload);
+    const items = {};
+
+    fragments.forEach((fragment, index) => {
+      items[backupChunkKey(index)] = backupChunkValue(
+        snapshotId,
+        index,
+        fragments.length,
+        fragment
+      );
+    });
+    items[backupMetaKey()] = {
+      format: FORMAT_VERSION,
+      kind: "backup",
+      snapshotId,
+      createdAt: cleanCreatedAt,
+      groupCount: compactGroups.length,
+      chunkCount: fragments.length,
+      dataHash: hashString(payload),
+      dataHash64: hashString64(payload)
+    };
+    return validateItems(items);
+  }
+
+  function decodeBackup(items) {
+    const source = items && typeof items === "object" ? items : {};
+    const meta = source[backupMetaKey()];
+    if (
+      !meta ||
+      meta.format !== FORMAT_VERSION ||
+      meta.kind !== "backup" ||
+      typeof meta.snapshotId !== "string" ||
+      !meta.snapshotId ||
+      !Number.isFinite(meta.createdAt) ||
+      !Number.isInteger(meta.chunkCount) ||
+      meta.chunkCount < 1 ||
+      meta.chunkCount > ITEM_COUNT_LIMIT ||
+      typeof meta.dataHash !== "string"
+    ) {
+      return null;
+    }
+
+    const fragments = [];
+    for (let index = 0; index < meta.chunkCount; index += 1) {
+      const chunk = source[backupChunkKey(index)];
+      if (
+        !chunk ||
+        chunk.format !== FORMAT_VERSION ||
+        chunk.kind !== "backup-data" ||
+        chunk.snapshotId !== meta.snapshotId ||
+        chunk.index !== index ||
+        chunk.total !== meta.chunkCount ||
+        typeof chunk.data !== "string"
+      ) {
+        return null;
+      }
+      fragments.push(chunk.data);
+    }
+
+    const payload = fragments.join("");
+    if (
+      hashString(payload) !== meta.dataHash ||
+      (typeof meta.dataHash64 === "string" && hashString64(payload) !== meta.dataHash64)
+    ) {
+      return null;
+    }
+
+    let decoded;
+    try {
+      decoded = JSON.parse(payload);
+    } catch (_error) {
+      return null;
+    }
+    if (!decoded || decoded.v !== FORMAT_VERSION || !Array.isArray(decoded.g)) {
+      return null;
+    }
+
+    const groups = [];
+    for (const compact of decoded.g) {
+      if (
+        !Array.isArray(compact) ||
+        compact.length < 9 ||
+        !validRecordId(compact[0]) ||
+        !Array.isArray(compact[8])
+      ) {
+        return null;
+      }
+      const tabs = [];
+      for (const compactTab of compact[8]) {
+        if (!Array.isArray(compactTab) || compactTab.length < 1) {
+          return null;
+        }
+        const tab = {
+          url: typeof compactTab[0] === "string" || compactTab[0] === null
+            ? compactTab[0]
+            : null
+        };
+        if (
+          typeof compactTab[1] === "string" &&
+          compactTab[1].length <= MAX_COOKIE_STORE_ID_LENGTH &&
+          /^firefox-container-[a-z0-9_-]+$/i.test(compactTab[1])
+        ) {
+          tab.cookieStoreId = compactTab[1];
+        }
+        tabs.push(tab);
+      }
+      const decodedEmpty = decodeIntentionalEmptyState(compact[0], tabs, compact[11] === 1);
+      groups.push({
+        id: compact[0],
+        title: String(compact[1] || ""),
+        color: String(compact[2] || "grey"),
+        icon: String(compact[3] || "none"),
+        keepAtTop: compact[4] === 1,
+        archived: compact[5] === 1,
+        createdAt: Number.isFinite(compact[6]) ? compact[6] : meta.createdAt,
+        keepAtTopOrder: Number.isFinite(compact[9]) ? compact[9] : null,
+        darkerColors: compact[10] === 1,
+        intentionallyEmpty: decodedEmpty.intentionallyEmpty,
+        skippedTabs: Number.isInteger(compact[7]) ? Math.max(0, compact[7]) : 0,
+        tabs: decodedEmpty.tabs
+      });
+    }
+    if (groups.length !== meta.groupCount) {
+      return null;
+    }
+    return {
+      snapshotId: meta.snapshotId,
+      createdAt: meta.createdAt,
+      groupCount: groups.length,
+      groups
+    };
+  }
+
+  function validMeta(key, value, now = Date.now()) {
+    return (
+      value &&
+      typeof value === "object" &&
+      value.format === FORMAT_VERSION &&
+      value.kind === "group" &&
+      validRecordId(value.id) &&
+      key === metaKey(value.id) &&
+      typeof value.revision === "string" &&
+      value.revision &&
+      Number.isFinite(value.updatedAt) &&
+      value.updatedAt <= now + MAX_FUTURE_CLOCK_SKEW_MS
+    );
+  }
+
+  function decode(items, now = Date.now()) {
+    const source = items && typeof items === "object" ? items : {};
+    const archiveKeysPresent = tombstoneArchiveKeys(source);
+    const archive = decodeTombstoneArchive(source);
+    const archiveCorrupt = archiveKeysPresent.length > 0 && !archive;
+    if (archiveCorrupt) {
+      return { records: [], incomplete: [], archivedIds: [], archiveCorrupt: true };
+    }
+    const archivedIds = archive?.ids || [];
+    const archivedIdSet = new Set(archivedIds);
+    const records = [];
+    const incomplete = [];
+
+    for (const [key, meta] of Object.entries(source)) {
+      if (!validMeta(key, meta, now)) {
+        continue;
+      }
+      // O arquivo v2 é a barreira durável usada quando lápides v1 antigas são
+      // compactadas. Um peer v3 antigo pode republicar o grupo depois disso;
+      // clientes novos devem continuar considerando aquele ID explicitamente
+      // excluído até que ele seja recriado sob uma nova identidade.
+      if (archivedIdSet.has(meta.id)) {
+        continue;
+      }
+
+      const version = { revision: meta.revision, updatedAt: meta.updatedAt };
+      if (meta.deleted === true) {
+        records.push({
+          type: "tombstone",
+          id: meta.id,
+          revision: meta.revision,
+          updatedAt: meta.updatedAt,
+          deletedAt: Number.isFinite(meta.deletedAt) ? meta.deletedAt : meta.updatedAt
+        });
+        continue;
+      }
+
+      if (!Number.isInteger(meta.chunkCount) || meta.chunkCount < 1 || meta.chunkCount > ITEM_COUNT_LIMIT) {
+        incomplete.push({ id: meta.id, ...version, reason: "metadados inválidos" });
+        continue;
+      }
+
+      const fragments = [];
+      let complete = true;
+      for (let index = 0; index < meta.chunkCount; index += 1) {
+        const chunk = source[chunkKey(meta.id, index)];
+        if (
+          !chunk ||
+          chunk.format !== FORMAT_VERSION ||
+          chunk.kind !== "tabs" ||
+          chunk.id !== meta.id ||
+          chunk.revision !== meta.revision ||
+          chunk.index !== index ||
+          chunk.total !== meta.chunkCount ||
+          typeof chunk.data !== "string"
+        ) {
+          complete = false;
+          break;
+        }
+        fragments.push(chunk.data);
+      }
+
+      const payload = fragments.join("");
+      if (
+        !complete ||
+        hashString(payload) !== meta.tabsHash ||
+        (typeof meta.tabsHash64 === "string" && hashString64(payload) !== meta.tabsHash64)
+      ) {
+        incomplete.push({ id: meta.id, ...version, reason: "fragmentos incompletos" });
+        continue;
+      }
+
+      let tabs;
+      try {
+        tabs = JSON.parse(payload);
+      } catch (_error) {
+        incomplete.push({ id: meta.id, ...version, reason: "abas inválidas" });
+        continue;
+      }
+
+      if (!Array.isArray(tabs)) {
+        incomplete.push({ id: meta.id, ...version, reason: "abas inválidas" });
+        continue;
+      }
+
+      const decodedEmpty = decodeIntentionalEmptyState(
+        meta.id,
+        tabs,
+        meta.intentionallyEmpty === true
+      );
+      records.push({
+        type: "group",
+        id: meta.id,
+        revision: meta.revision,
+        updatedAt: meta.updatedAt,
+        title: String(meta.title || ""),
+        color: String(meta.color || "grey"),
+        icon: String(meta.icon || "none"),
+        darkerColors: typeof meta.darkerColors === "boolean" ? meta.darkerColors : undefined,
+        keepAtTop: meta.keepAtTop === true,
+        keepAtTopOrder: Number.isFinite(meta.keepAtTopOrder) ? meta.keepAtTopOrder : null,
+        archived: meta.archived === true,
+        tabs: decodedEmpty.tabs,
+        intentionallyEmpty: decodedEmpty.intentionallyEmpty,
+        skippedTabs: Number.isInteger(meta.skippedTabs) ? Math.max(0, meta.skippedTabs) : 0,
+        createdAt: Number.isFinite(meta.createdAt) ? meta.createdAt : meta.updatedAt
+      });
+    }
+
+    return { records, incomplete, archivedIds, archiveCorrupt: false };
+  }
+
+  root.GruposSyncStore = Object.freeze({
+    FORMAT_VERSION,
+    KEY_PREFIX,
+    BACKUP_KEY_PREFIX,
+    TOMBSTONE_ARCHIVE_KEY_PREFIX,
+    ITEM_LIMIT_BYTES,
+    TOTAL_LIMIT_BYTES,
+    ITEM_COUNT_LIMIT,
+    MAX_FUTURE_CLOCK_SKEW_MS,
+    backupKeys,
+    decodeTombstoneArchive,
+    decodeBackup,
+    chunkKey,
+    compareVersions,
+    decode,
+    encodeBackup,
+    encodeGroup,
+    encodeTombstone,
+    encodeTombstoneArchive,
+    groupFingerprint,
+    hashString64,
+    individualTombstones,
+    groupPrefix,
+    isSyncKey,
+    itemBytes,
+    keysForId,
+    metaKey,
+    sharedGroupData,
+    storageBytes,
+    tombstoneArchiveKeys
+  });
+})(globalThis);
